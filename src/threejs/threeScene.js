@@ -1,6 +1,7 @@
 import React,{Component} from "react";
 import * as THREE from "three";
 import { OrbitControls } from "three/examples/jsm/controls/OrbitControls"
+import {Water} from "./libs/Water2"
 
 // import vertex from "./shaders/vertexShader";
 // import fragment from "./shaders/fragmentShader";
@@ -15,6 +16,13 @@ import { OrbitControls } from "three/examples/jsm/controls/OrbitControls"
 
 //Initialise GUI
 // const gui = new dat.GUI();
+
+const params = {
+    color: '#ffffff',
+    scale: 4,
+    flowX: 1,
+    flowY: 1
+};
 
 
 class ThreeScene extends Component{
@@ -112,15 +120,51 @@ class ThreeScene extends Component{
         this.controls.enableDamping = true
 
         //Add cube
-        var geometry = new THREE.PlaneGeometry(1,1)
-        var material = new THREE.MeshBasicMaterial(
-            {
-                color:new THREE.Color('red'),
+        // var geometry = new THREE.PlaneGeometry(1,1)
+        // var material = new THREE.MeshBasicMaterial(
+        //     {
+        //         color:new THREE.Color('red'),
                 
-            }
-        )
-        this.cube = new THREE.Mesh(geometry,material)
-        this.scene.add(this.cube)
+        //     }
+        // )
+        // this.cube = new THREE.Mesh(geometry,material)
+        // this.scene.add(this.cube)
+
+        // ground
+
+        const groundGeometry = new THREE.PlaneGeometry( 20, 20 );
+        const groundMaterial = new THREE.MeshStandardMaterial( { roughness: 0.8, metalness: 0.4 } );
+        const ground = new THREE.Mesh( groundGeometry, groundMaterial );
+        ground.rotation.x = Math.PI * - 0.5;
+        this.scene.add( ground );
+
+        const textureLoader = new THREE.TextureLoader();
+        textureLoader.load( './static/textures/FloorsCheckerboard_S_Diffuse.jpg', function ( map ) {
+
+            map.wrapS = THREE.RepeatWrapping;
+            map.wrapT = THREE.RepeatWrapping;
+            map.anisotropy = 16;
+            map.repeat.set( 4, 4 );
+            groundMaterial.map = map;
+            groundMaterial.needsUpdate = true;
+
+        } );
+
+        // water
+
+        const waterGeometry = new THREE.PlaneGeometry( 20, 20 );
+
+         let water = new Water( waterGeometry, {
+            color: params.color,
+            scale: params.scale,
+            flowDirection: new THREE.Vector2( params.flowX, params.flowY ),
+            textureWidth: 1024,
+            textureHeight: 1024
+        } );
+
+        water.position.y = 1;
+        water.rotation.x = Math.PI * - 0.5;
+        this.scene.add( water );
 
         
         //Add Ambient light
